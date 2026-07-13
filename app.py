@@ -1,6 +1,6 @@
 """
-EvaAI Chat - Flask Application
-A beautiful AI chat web app with API integration
+EvaAI Chat - Flask Application (Gemini API)
+A beautiful AI chat web app with Google Gemini API integration
 """
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
@@ -28,34 +28,86 @@ conversations = {}
 
 def get_ai_response(message, conversation_history=None):
     """
-    Get AI response from Pollinations AI API (free, no key required)
-    Falls back to a local response if API fails
+    Get AI response from Google Gemini API
+    Free tier: 1500 requests/day with Flash models
+    Get API key: https://aistudio.google.com/app/apikey
     """
+    api_key = app.config['GEMINI_API_KEY']
+    model = app.config['GEMINI_MODEL']
+    
+    if not api_key:
+        return "⚠️ Please set your GEMINI_API_KEY environment variable.\n\nGet a free API key from: https://aistudio.google.com/app/apikey"
+    
     try:
-        # Build context from conversation history
-        context = ""
+        # Build conversation history for Gemini
+        contents = []
+        
+        # Add system instruction
+        contents.append({
+            "role": "user",
+            "parts": [{"text": "You are EvaAI, a helpful and friendly AI assistant. You provide clear, accurate, and engaging responses. You can help with coding, writing, analysis, explanations, and general conversation."}]
+        })
+        contents.append({
+            "role": "model",
+            "parts": [{"text": "Understood! I'm EvaAI, ready to help you with anything you need."}]
+        })
+        
+        # Add conversation history
         if conversation_history:
-            for msg in conversation_history[-10:]:  # Last 10 messages for context
-                role = "User" if msg["role"] == "user" else "Assistant"
-                context += f"{role}: {msg['content']}\n"
+            for msg in conversation_history[-10:]:  # Last 10 messages
+                role = "user" if msg["role"] == "user" else "model"
+                contents.append({
+                    "role": role,
+                    "parts": [{"text": msg["content"]}]
+                })
         
-        # Pollinations AI - Free, no API key needed
-        prompt = message
-        if context:
-            prompt = f"Previous conversation:\n{context}\n\nUser: {message}\nAssistant:"
+        # Add current message
+        contents.append({
+            "role": "user",
+            "parts": [{"text": message}]
+        })
         
-        url = f"{app.config['AI_API_URL']}{requests.utils.quote(prompt)}"
+        # Gemini API endpoint
+        url = f"{app.config['GEMINI_API_URL']}{model}:generateContent?key={api_key}"
+        
+        payload = {
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.7,
+                "topK": 40,
+                "topP": 0.95,
+                "maxOutputTokens": 2048,
+            }
+        }
         
         headers = {
             "Content-Type": "application/json"
         }
         
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
         
         if response.status_code == 200:
-            return response.text.strip()
+            data = response.json()
+            
+            # Extract text from response
+            if "candidates" in data and len(data["candidates"]) > 0:
+                candidate = data["candidates"][0]
+                if "content" in candidate and "parts" in candidate["content"]:
+                    text_parts = [part["text"] for part in candidate["content"]["parts"] if "text" in part]
+                    return "\n".join(text_parts).strip()
+            
+            return "I received a response but couldn't parse it properly."
+            
+        elif response.status_code == 429:
+            return "⚠️ Rate limit exceeded. Gemini free tier allows 1500 requests/day. Please try again later or upgrade to paid tier."
+        elif response.status_code == 400:
+            error_data = response.json()
+            error_msg = error_data.get("error", {}).get("message", "Bad request")
+            return f"⚠️ API Error: {error_msg}"
+        elif response.status_code == 403:
+            return "⚠️ API key invalid or expired. Please check your GEMINI_API_KEY."
         else:
-            return f"I'm having trouble connecting right now. Status: {response.status_code}"
+            return f"⚠️ API Error (Status {response.status_code}): {response.text[:200]}"
             
     except requests.exceptions.Timeout:
         return "The AI service is taking too long to respond. Please try again."
@@ -161,7 +213,7 @@ def health_check():
     """Health check endpoint for Koyeb"""
     return jsonify({
         "status": "healthy",
-        "service": "EvaAI Chat",
+        "service": "EvaAI Chat (Gemini)",
         "timestamp": datetime.now().isoformat()
     })
 
