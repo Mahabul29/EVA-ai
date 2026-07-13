@@ -1,0 +1,21 @@
+# Koyeb Deployment Configuration
+# Deploy this app to Koyeb using this file
+name: eva-ai-chat
+
+routes:
+  - path: /
+    port: 8000
+
+env:
+  - name: SECRET_KEY
+    value: your-secret-key-here-change-me
+  - name: CORS_ORIGINS
+    value: "*"
+  - name: PORT
+    value: "8000"
+  - name: DEBUG
+    value: "false"
+
+ports:
+  - port: 8000
+    protocol: http
