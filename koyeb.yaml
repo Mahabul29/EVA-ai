@@ -1,4 +1,4 @@
-# Koyeb Deployment Configuration
+# Koyeb Deployment Configuration (Gemini API)
 # Deploy this app to Koyeb using this file
 name: eva-ai-chat
 
@@ -11,6 +11,10 @@ env:
     value: your-secret-key-here-change-me
   - name: CORS_ORIGINS
     value: "*"
+  - name: GEMINI_API_KEY
+    value: your-gemini-api-key-here
+  - name: GEMINI_MODEL
+    value: gemini-2.5-flash
   - name: PORT
     value: "8000"
   - name: DEBUG
