@@ -1,5 +1,5 @@
 """
-EvaAI Chat - Configuration
+EvaAI Chat - Configuration (Gemini API)
 """
 import os
 
@@ -10,14 +10,14 @@ class Config:
     # CORS settings for cross-origin access (Koyeb deployment)
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')
     
-    # AI API Configuration
-    # Using Pollinations AI (free, no API key required)
-    AI_API_URL = os.environ.get('AI_API_URL', 'https://text.pollinations.ai/')
+    # Google Gemini API Configuration
+    # Get your free API key from: https://aistudio.google.com/app/apikey
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+    GEMINI_API_URL = os.environ.get('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/')
     
-    # Alternative: You can use OpenRouter, Groq, or any OpenAI-compatible API
-    # Just set AI_API_URL and AI_API_KEY in environment variables
-    AI_API_KEY = os.environ.get('AI_API_KEY', None)
-    AI_MODEL = os.environ.get('AI_MODEL', 'openai')
+    # Default model - Gemini 2.5 Flash (free tier: 1500 requests/day)
+    # Other free options: gemini-2.5-flash-lite, gemini-3.1-flash-lite
+    GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
     
     # App settings
     MAX_HISTORY = int(os.environ.get('MAX_HISTORY', '20'))
