@@ -1,0 +1,16 @@
+:root {
+    --bg-primary: #0d0d0d;
+    --bg-secondary: #171717;
+    --bg-sidebar: #0a0a0a;
+    --bg-input: #2a2a2a;
+    --bg-hover: #262626;
+    --bg-message-user: #1a3a2f;
+    --bg-message-ai: #1a1a1a;
+    --text-primary: #e8e8e8;
+    --text-secondary: #a0a0a0;
+    --text-muted: #6b6b6b;
+    --accent: #10a37f;
+    --accent-hover: #0d8c6d;
+    --border: #2a2a2a;
+    --radius: 12px;
+}
