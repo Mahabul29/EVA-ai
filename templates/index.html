@@ -2,129 +2,249 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EvaAI - Chat with AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f0f0f">
+    <meta name="description" content="EvaAI - AI-powered chat assistant using Google Gemini">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EvaAI">
+    
+    <title>EvaAI</title>
+    
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg">
+    <link rel="apple-touch-icon" href="/static/icons/icon.svg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">⚡</div>
-                    <span>EvaAI</span>
-                </div>
-                <button class="new-chat-btn" onclick="startNewChat()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    New Chat
-                </button>
-            </div>
-            
-            <div class="sidebar-content">
-                <div class="section-title">Recent Chats</div>
-                <div class="chat-list" id="chatList">
-                    <!-- Chat items will be added here -->
-                </div>
-            </div>
-            
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar">U</div>
-                    <span>User</span>
-                </div>
-            </div>
-        </aside>
+    <div class="install-banner" id="installBanner">
+        <div class="install-banner-inner">
+            <svg class="install-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <span>Install EvaAI for the best experience</span>
+            <button class="install-banner-btn" onclick="installApp()">Install</button>
+            <button class="install-banner-close" onclick="dismissInstall()">&times;</button>
+        </div>
+    </div>
 
-        <!-- Main Chat Area -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="chat-header">
-                <button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="offline-bar" id="offlineBar">
+        <span class="offline-dot"></span>
+        <span>You are offline</span>
+    </div>
+
+    <div class="app-layout">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <a href="/" class="sidebar-brand">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <span class="brand-text">EvaAI</span>
+                </a>
+                
+                <button class="new-chat" onclick="startNewChat()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>New chat</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-chats">
+                <div class="sidebar-section-title">Today</div>
+                <div class="chat-list" id="chatList"></div>
+            </div>
+            
+            <div class="sidebar-bottom">
+                <button class="sidebar-action" onclick="showSettings()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main" id="main">
+            <header class="topbar">
+                <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
                     </svg>
                 </button>
-                <div class="header-title">
-                    <span class="model-badge">AI Assistant</span>
+                
+                <div class="topbar-center">
+                    <span class="topbar-model">Gemini 2.5 Flash</span>
                 </div>
-                <div class="header-actions">
-                    <button class="icon-btn" onclick="clearCurrentChat()" title="Clear Chat">
+                
+                <div class="topbar-actions">
+                    <button class="topbar-btn" onclick="shareChat()" title="Share" aria-label="Share">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                            <polyline points="16 6 12 2 8 6"/>
+                            <line x1="12" y1="2" x2="12" y2="15"/>
+                        </svg>
+                    </button>
+                    <button class="topbar-btn" onclick="clearCurrentChat()" title="Clear chat" aria-label="Clear chat">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                         </svg>
                     </button>
                 </div>
             </header>
 
-            <!-- Chat Messages -->
-            <div class="chat-messages" id="chatMessages">
-                <!-- Welcome Screen -->
-                <div class="welcome-screen" id="welcomeScreen">
-                    <div class="welcome-content">
-                        <div class="welcome-icon">🤖</div>
-                        <h1>Welcome to EvaAI</h1>
-                        <p>Your intelligent AI assistant. Ask me anything!</p>
-                        <div class="suggestion-chips">
-                            <button class="chip" onclick="sendSuggestion('Explain quantum computing in simple terms')">
-                                💡 Explain quantum computing
+            <div class="messages-area" id="messagesArea">
+                <div class="welcome" id="welcomeScreen">
+                    <div class="welcome-inner">
+                        <div class="welcome-logo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <h1 class="welcome-title">How can I help you today?</h1>
+                        <div class="suggestions">
+                            <button class="suggestion-card" onclick="sendSuggestion('Explain quantum computing like I\'m 5')">
+                                <div class="suggestion-icon">💡</div>
+                                <div class="suggestion-text">
+                                    <strong>Explain quantum computing</strong>
+                                    <span>Like I'm 5 years old</span>
+                                </div>
                             </button>
-                            <button class="chip" onclick="sendSuggestion('Write a Python function to sort a list')">
-                                🐍 Write Python code
+                            <button class="suggestion-card" onclick="sendSuggestion('Write a Python function to reverse a string')">
+                                <div class="suggestion-icon">🐍</div>
+                                <div class="suggestion-text">
+                                    <strong>Write Python code</strong>
+                                    <span>Reverse a string function</span>
+                                </div>
                             </button>
-                            <button class="chip" onclick="sendSuggestion('What are the benefits of meditation?')">
-                                🧘 Benefits of meditation
+                            <button class="suggestion-card" onclick="sendSuggestion('What are the health benefits of daily meditation?')">
+                                <div class="suggestion-icon">🧘</div>
+                                <div class="suggestion-text">
+                                    <strong>Health benefits</strong>
+                                    <span>Of daily meditation</span>
+                                </div>
                             </button>
-                            <button class="chip" onclick="sendSuggestion('Help me plan a trip to Japan')">
-                                ✈️ Plan a trip to Japan
+                            <button class="suggestion-card" onclick="sendSuggestion('Create a 7-day itinerary for Tokyo, Japan')">
+                                <div class="suggestion-icon">✈️</div>
+                                <div class="suggestion-text">
+                                    <strong>Plan a trip</strong>
+                                    <span>7-day Tokyo itinerary</span>
+                                </div>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Input Area -->
             <div class="input-area">
-                <div class="input-container">
-                    <textarea 
-                        id="messageInput" 
-                        placeholder="Message EvaAI..."
-                        rows="1"
-                        onkeydown="handleKeyDown(event)"
-                        oninput="autoResize(this)"
-                    ></textarea>
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                        </svg>
-                    </button>
-                </div>
-                <div class="input-footer">
-                    <span>EvaAI can make mistakes. Consider checking important information.</span>
+                <div class="input-wrapper">
+                    <div class="input-box">
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="Message EvaAI..."
+                            rows="1"
+                            onkeydown="handleKeyDown(event)"
+                            oninput="autoResize(this)"
+                            aria-label="Message input"
+                        ></textarea>
+                        <button class="send-button" id="sendBtn" onclick="sendMessage()" aria-label="Send message">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="input-hint">EvaAI can make mistakes. Consider checking important information.</p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>EvaAI is thinking...</p>
+    <div class="modal-backdrop" id="settingsModal" onclick="closeSettings(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="modal-close" onclick="hideSettings()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <span class="setting-label">Theme</span>
+                        <span class="setting-desc">Choose your preferred appearance</span>
+                    </div>
+                    <select class="setting-select" id="themeSelect" onchange="changeTheme(this.value)">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                        <option value="system">System</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <span class="setting-label">Font Size</span>
+                        <span class="setting-desc">Adjust text size for readability</span>
+                    </div>
+                    <select class="setting-select" id="fontSizeSelect" onchange="changeFontSize(this.value)">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                <div class="setting-divider"></div>
+                <div class="setting-row danger">
+                    <div class="setting-info">
+                        <span class="setting-label">Delete All Chats</span>
+                        <span class="setting-desc">This action cannot be undone</span>
+                    </div>
+                    <button class="btn-danger" onclick="clearAllData()">Delete All</button>
+                </div>
+                <div class="setting-divider"></div>
+                <div class="about-section">
+                    <div class="about-logo">⚡</div>
+                    <div class="about-text">
+                        <strong>EvaAI</strong>
+                        <span>v1.0 · Powered by Google Gemini</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="toast-container" id="toastContainer"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(r => console.log('SW registered'))
+                .catch(e => console.log('SW failed', e));
+        }
+    </script>
 </body>
 </html>
