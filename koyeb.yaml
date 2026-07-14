@@ -1,5 +1,3 @@
-# Koyeb Deployment Configuration (Gemini API)
-# Deploy this app to Koyeb using this file
 name: eva-ai-chat
 
 routes:
