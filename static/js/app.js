@@ -17,9 +17,6 @@ const settingsModal  = document.getElementById('settingsModal');
 const themeSelect    = document.getElementById('themeSelect');
 const fontSizeSelect = document.getElementById('fontSizeSelect');
 const toastContainer = document.getElementById('toastContainer');
-const apiKeyInput     = document.getElementById('apiKeyInput');
-const apiKeyToggle    = document.getElementById('apiKeyToggle');
-const apiKeyStatus    = document.getElementById('apiKeyStatus');
 
 let conversations = {};          // { id: { id, title, messages: [{role, content}] } }
 let currentConversationId = null;
@@ -30,7 +27,6 @@ const STORAGE_KEY  = 'evaai_conversations';
 const THEME_KEY    = 'evaai_theme';
 const FONT_KEY     = 'evaai_font_size';
 const INSTALL_KEY  = 'evaai_install_dismissed';
-const API_KEY_KEY  = 'evaai_api_key';
 
 /* ---------- Init ---------- */
 document.addEventListener('DOMContentLoaded', init);
@@ -39,7 +35,6 @@ function init() {
     loadConversations();
     renderChatList();
     loadSettings();
-    loadApiKey();
     setupInstallPrompt();
     setupOfflineDetection();
 
@@ -208,25 +203,13 @@ async function sendMessage() {
     showTypingIndicator();
 
     try {
-        const headers = { 'Content-Type': 'application/json' };
-        const apiKey = localStorage.getItem(API_KEY_KEY);
-        if (apiKey) headers['X-API-Key'] = apiKey;
+        // Placeholder — no backend wired up yet.
+        // Replace this block with a fetch('/api/chat', ...) call once the API is added.
+        await new Promise(resolve => setTimeout(resolve, 600));
 
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-                message: message,
-                conversation_id: currentConversationId
-            })
-        });
-
-        if (!response.ok) throw new Error('Request failed: ' + response.status);
-
-        const data = await response.json();
         removeTypingIndicator();
 
-        const reply = data.response || data.message || '(No response)';
+        const reply = "This is a preview response. Connect an AI backend to make EvaAI actually think.";
         appendMessage('assistant', reply);
         conversations[currentConversationId].messages.push({ role: 'assistant', content: reply });
         conversations[currentConversationId].updatedAt = Date.now();
@@ -375,40 +358,6 @@ function changeFontSize(value) {
 
 function applyFontSize(value) {
     document.documentElement.setAttribute('data-font-size', value);
-}
-
-/* ---------- API key ---------- */
-function loadApiKey() {
-    if (!apiKeyInput) return;
-    const saved = localStorage.getItem(API_KEY_KEY);
-    if (saved) {
-        apiKeyInput.value = saved;
-        apiKeyStatus.textContent = 'Set on this device';
-        apiKeyStatus.classList.add('set');
-    } else {
-        apiKeyStatus.textContent = 'Not set';
-        apiKeyStatus.classList.remove('set');
-    }
-}
-
-function saveApiKey() {
-    const value = apiKeyInput.value.trim();
-    if (!value) {
-        localStorage.removeItem(API_KEY_KEY);
-        apiKeyStatus.textContent = 'Not set';
-        apiKeyStatus.classList.remove('set');
-        showToast('API key cleared', 'info');
-        return;
-    }
-    localStorage.setItem(API_KEY_KEY, value);
-    apiKeyStatus.textContent = 'Set on this device';
-    apiKeyStatus.classList.add('set');
-    showToast('API key saved', 'success');
-}
-
-function toggleApiKeyVisibility() {
-    if (!apiKeyInput) return;
-    apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
 }
 
 function clearAllData() {
